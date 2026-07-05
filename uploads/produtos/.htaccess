@@ -1,0 +1,8 @@
+# Esta pasta armazena apenas imagens enviadas pelos usuários.
+# Bloqueia a execução de qualquer script, mesmo que alguém consiga enviar um arquivo malicioso.
+<FilesMatch "\.(php|phtml|php\d|pl|py|cgi|asp|aspx|sh)$">
+    Require all denied
+</FilesMatch>
+
+Options -ExecCGI
+php_flag engine off
