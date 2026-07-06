@@ -1,0 +1,20 @@
+/*
+ * Truque clássico de "sticky footer" com flexbox:
+ * o body vira uma coluna com altura mínima igual à tela inteira,
+ * e o footer usa margin-top:auto para ser empurrado sempre para o final,
+ * mesmo quando o conteúdo da página é curto.
+ */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+footer {
+    margin-top: auto;
+}

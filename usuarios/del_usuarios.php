@@ -6,16 +6,40 @@ exigirLogin('../autenticacao/login.html');
 
 require '../config/conexao.php';
 
-$result = $strcon->query("SELECT idcategoria, nomecategoria FROM Categorias ORDER BY nomecategoria");
+if (isset($_GET['iduser']) && ctype_digit($_GET['iduser'])) {
+    $iduser = (int) $_GET['iduser'];
+
+    $stmt_busca = $strcon->prepare('SELECT username FROM Usuarios WHERE iduser = ?');
+    $stmt_busca->bind_param('i', $iduser);
+    $stmt_busca->execute();
+    $usuario = $stmt_busca->get_result()->fetch_assoc();
+
+    // Impede que o usuário logado exclua a própria conta e fique sem acesso
+    if ($usuario && $usuario['username'] === $_SESSION['username']) {
+        echo "<script>alert('Você não pode excluir o usuário com o qual está logado.'); window.location.href='del_usuarios.php';</script>";
+        exit;
+    }
+
+    $stmt = $strcon->prepare('DELETE FROM Usuarios WHERE iduser = ?');
+    $stmt->bind_param('i', $iduser);
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Usuário excluído com sucesso!'); window.location.href='del_usuarios.php';</script>";
+    } else {
+        echo "<script>alert('Erro ao excluir o usuário. Tente novamente.'); window.location.href='del_usuarios.php';</script>";
+    }
+    exit;
+}
+
+$result = $strcon->query('SELECT iduser, username FROM Usuarios ORDER BY username');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listar Categorias - BP Rural</title>
+    <title>Excluir Usuários - BP Rural</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/site.css" rel="stylesheet">
 </head>
 <body>
 
@@ -31,11 +55,6 @@ $result = $strcon->query("SELECT idcategoria, nomecategoria FROM Categorias ORDE
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="../paginas/tatuadeiras.php">Tatuadeiras</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../paginas/tintas.php">Tintas e Pastas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../paginas/brincos.php">Brincos e Aplicadores</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../paginas/marcadores.php">Marcadores e Fogareiros</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../paginas/diversos.php">Diversos</a></li>
                     <li class="nav-item"><a class="nav-link" href="../paginas/menu.php">Voltar ao Menu</a></li>
                 </ul>
             </div>
@@ -43,23 +62,22 @@ $result = $strcon->query("SELECT idcategoria, nomecategoria FROM Categorias ORDE
     </nav>
 
     <div class="container py-5">
-        <h2 class="text-center">Lista de Categorias</h2>
-
+        <h2 class="text-center">Lista de Usuários</h2>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Categoria</th>
+                    <th>Usuário</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
-                <?php while ($categoria = $result->fetch_assoc()): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
                     <tr>
-                        <td><?php echo (int) $categoria['idcategoria']; ?></td>
-                        <td><?php echo e($categoria['nomecategoria']); ?></td>
+                        <td><?php echo (int) $row['iduser']; ?></td>
+                        <td><?php echo e($row['username']); ?></td>
                         <td>
-                            <a href="sql_alt_categorias.php?idcategoria=<?php echo (int) $categoria['idcategoria']; ?>" class="btn btn-warning">Alterar</a>
+                            <a href="del_usuarios.php?iduser=<?php echo (int) $row['iduser']; ?>" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este usuário?')">Excluir</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>

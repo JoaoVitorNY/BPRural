@@ -1,9 +1,10 @@
 <?php
+session_start();
 require 'includes/functions.php';
 require 'config/conexao.php';
 
 // Exibe os 3 produtos com o menor preço como destaque
-$result = $strcon->query('SELECT nomeproduto, preco, descricao, foto FROM Produtos ORDER BY preco ASC LIMIT 3');
+$result = $strcon->query('SELECT idproduto, nomeproduto, preco, descricao, foto FROM Produtos ORDER BY preco ASC LIMIT 3');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -12,6 +13,7 @@ $result = $strcon->query('SELECT nomeproduto, preco, descricao, foto FROM Produt
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sobre a BP Rural</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/site.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
@@ -46,7 +48,7 @@ $result = $strcon->query('SELECT nomeproduto, preco, descricao, foto FROM Produt
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
+                <ul class="navbar-nav mx-lg-auto mb-2 mb-lg-0 flex-wrap">
                     <li class="nav-item"><a class="nav-link" href="paginas/tatuadeiras.php">Tatuadeiras</a></li>
                     <li class="nav-item"><a class="nav-link" href="paginas/tintas.php">Tintas e Pastas</a></li>
                     <li class="nav-item"><a class="nav-link" href="paginas/brincos.php">Brincos e Aplicadores</a></li>
@@ -55,7 +57,21 @@ $result = $strcon->query('SELECT nomeproduto, preco, descricao, foto FROM Produt
                     <li class="nav-item"><a class="nav-link" href="index.php#destaques">Promoções</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php">Página Inicial</a></li>
                 </ul>
-                <a href="autenticacao/login.html" class="btn btn-outline-light ms-3 px-4 fw-bold">Login</a>
+                <?php if (!empty($_SESSION['cliente_id'])): ?>
+                    <?php $primeiroNome = explode(' ', trim($_SESSION['cliente_nome']))[0]; ?>
+                    <div class="dropdown ms-lg-2">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Olá, <?php echo e($primeiroNome); ?>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="carrinho/carrinho.php">Meu Carrinho</a></li>
+                            <li><a class="dropdown-item" href="clientes/logout.php">Sair</a></li>
+                        </ul>
+                    </div>
+                <?php else: ?>
+                    <a href="clientes/login.php" class="btn btn-outline-light me-2">Entrar</a>
+                    <a href="clientes/cadastro.php" class="btn btn-light">Criar Conta</a>
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -90,7 +106,7 @@ $result = $strcon->query('SELECT nomeproduto, preco, descricao, foto FROM Produt
                                 <h5 class="card-title"><?php echo e($produto['nomeproduto']); ?></h5>
                                 <p class="card-text"><?php echo nl2br(e($produto['descricao'])); ?></p>
                                 <p class="card-text"><strong>R$ <?php echo number_format((float) $produto['preco'], 2, ',', '.'); ?></strong></p>
-                                <a href="#" class="btn btn-success mt-auto">Comprar</a>
+                                <a href="carrinho/adicionar.php?idproduto=<?php echo (int) $produto['idproduto']; ?>" class="btn btn-success mt-auto">Comprar</a>
                             </div>
                         </div>
                     </div>

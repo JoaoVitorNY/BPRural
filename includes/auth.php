@@ -12,3 +12,18 @@ function exigirLogin(string $urlLogin): void
         exit;
     }
 }
+
+/**
+ * Exige que exista um cliente logado (área de compras do site).
+ * Usa uma sessão separada da do painel administrativo (username),
+ * então um cliente logado não vira administrador e vice-versa.
+ *
+ * @param string $urlLogin Caminho relativo até clientes/login.php
+ */
+function exigirLoginCliente(string $urlLogin): void
+{
+    if (empty($_SESSION['cliente_id'])) {
+        header('Location: ' . $urlLogin);
+        exit;
+    }
+}
